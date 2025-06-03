@@ -112,6 +112,7 @@ LICENSE
     #include <fstream>
     #include <streambuf>
     #include <string>
+    #include <cstring>
 #endif
 
 
@@ -403,9 +404,22 @@ namespace sf {
         /// @brief Comparison operator for use in maps
         inline bool operator<(const modulator_source_t& other) const
         {
-            return (type < other.type) || (direction < other.direction) ||
-                   (polarity < other.polarity) || (controller_type < other.controller_type) ||
-                   (midi < other.midi);
+            return (type < other.type) ||
+                   ((type == other.type) &&
+                    ((direction < other.direction) ||
+                     ((direction == other.direction) &&
+                      ((polarity < other.polarity) ||
+                       ((polarity == other.polarity) &&
+                        ((controller_type < other.controller_type) ||
+                         ((controller_type == other.controller_type) && (midi < other.midi))))))));
+        }
+
+        /// @brief Comparison operator for use in maps
+        inline bool operator==(const modulator_source_t& other) const
+        {
+            return (type == other.type) && (direction == other.direction) &&
+                   (polarity == other.polarity) && (controller_type == other.controller_type) &&
+                   (midi == other.midi);
         }
     };
 
@@ -427,7 +441,10 @@ namespace sf {
         /// @brief Comparison operator for use in maps
         inline bool operator<(const modulator_id_t& other) const
         {
-            return (src < other.src) || (dest < other.dest) || (amount_src < other.amount_src);
+            return (src < other.src) ||
+                   ((src == other.src) &&
+                    ((dest < other.dest) ||
+                     ((dest == other.dest) && (amount_src < other.amount_src))));
         }
     };
 
@@ -998,7 +1015,10 @@ namespace sf {
         // MIDI Continuous Controller 1 to Vibrato LFO Pitch Depth
         {
             {
-                { MOD_SRC_TYPE_LINEAR, MOD_SRC_DIR_MIN_TO_MAX, MOD_SRC_POL_UNIPOLAR, MOD_CTRL_TYPE_MIDI, .midi=1 },
+                {
+                    .type=MOD_SRC_TYPE_LINEAR, .direction=MOD_SRC_DIR_MIN_TO_MAX,
+                    .polarity=MOD_SRC_POL_UNIPOLAR, .controller_type=MOD_CTRL_TYPE_MIDI, .midi=1
+                },
                 GEN_TYPE_VIBRATO_LFO_TO_PITCH,
                 { MOD_SRC_TYPE_LINEAR, MOD_SRC_DIR_MIN_TO_MAX, MOD_SRC_POL_UNIPOLAR, MOD_CTRL_TYPE_SRC, MOD_CTRL_SRC_NONE },
             },
@@ -1010,7 +1030,10 @@ namespace sf {
         // MIDI Continuous Controller 7 to Initial Attenuation
         {
             {
-                { MOD_SRC_TYPE_CONCAVE, MOD_SRC_DIR_MAX_TO_MIN, MOD_SRC_POL_UNIPOLAR, MOD_CTRL_TYPE_MIDI, .midi=7 },
+                {
+                    .type=MOD_SRC_TYPE_CONCAVE, .direction=MOD_SRC_DIR_MAX_TO_MIN,
+                    .polarity=MOD_SRC_POL_UNIPOLAR, .controller_type=MOD_CTRL_TYPE_MIDI, .midi=7
+                },
                 GEN_TYPE_INITIAL_ATTENUATION,
                 { MOD_SRC_TYPE_LINEAR, MOD_SRC_DIR_MIN_TO_MAX, MOD_SRC_POL_UNIPOLAR, MOD_CTRL_TYPE_SRC, MOD_CTRL_SRC_NONE },
             },
@@ -1022,7 +1045,10 @@ namespace sf {
         //  MIDI Continuous Controller 10 to Pan Position
         {
             {
-                { MOD_SRC_TYPE_LINEAR, MOD_SRC_DIR_MIN_TO_MAX, MOD_SRC_POL_BIPOLAR, MOD_CTRL_TYPE_MIDI, .midi=10 },
+                {
+                    .type=MOD_SRC_TYPE_LINEAR, .direction=MOD_SRC_DIR_MIN_TO_MAX,
+                    .polarity=MOD_SRC_POL_BIPOLAR, .controller_type=MOD_CTRL_TYPE_MIDI, .midi=10
+                },
                 GEN_TYPE_PAN,
                 { MOD_SRC_TYPE_LINEAR, MOD_SRC_DIR_MIN_TO_MAX, MOD_SRC_POL_UNIPOLAR, MOD_CTRL_TYPE_SRC, MOD_CTRL_SRC_NONE },
             },
@@ -1034,7 +1060,10 @@ namespace sf {
         //  MIDI Continuous Controller 11 to Initial Attenuation
         {
             {
-                { MOD_SRC_TYPE_CONCAVE, MOD_SRC_DIR_MAX_TO_MIN, MOD_SRC_POL_UNIPOLAR, MOD_CTRL_TYPE_MIDI, .midi=11 },
+                {
+                    .type=MOD_SRC_TYPE_CONCAVE, .direction=MOD_SRC_DIR_MAX_TO_MIN,
+                    .polarity=MOD_SRC_POL_UNIPOLAR, .controller_type=MOD_CTRL_TYPE_MIDI, .midi=11
+                },
                 GEN_TYPE_INITIAL_ATTENUATION,
                 { MOD_SRC_TYPE_LINEAR, MOD_SRC_DIR_MIN_TO_MAX, MOD_SRC_POL_UNIPOLAR, MOD_CTRL_TYPE_SRC, MOD_CTRL_SRC_NONE },
             },
@@ -1046,7 +1075,10 @@ namespace sf {
         //  MIDI Continuous Controller 91 to Reverb Effects Send
         {
             {
-                { MOD_SRC_TYPE_LINEAR, MOD_SRC_DIR_MIN_TO_MAX, MOD_SRC_POL_UNIPOLAR, MOD_CTRL_TYPE_MIDI, .midi=91 },
+                {
+                    .type=MOD_SRC_TYPE_LINEAR, .direction=MOD_SRC_DIR_MIN_TO_MAX,
+                    .polarity=MOD_SRC_POL_UNIPOLAR, .controller_type=MOD_CTRL_TYPE_MIDI, .midi=91
+                },
                 GEN_TYPE_REVERB_EFFECTS_SEND,
                 { MOD_SRC_TYPE_LINEAR, MOD_SRC_DIR_MIN_TO_MAX, MOD_SRC_POL_UNIPOLAR, MOD_CTRL_TYPE_SRC, MOD_CTRL_SRC_NONE },
             },
@@ -1058,7 +1090,10 @@ namespace sf {
         //  MIDI Continuous Controller 93 to Chorus Effects Send
         {
             {
-                { MOD_SRC_TYPE_LINEAR, MOD_SRC_DIR_MIN_TO_MAX, MOD_SRC_POL_UNIPOLAR, MOD_CTRL_TYPE_MIDI, .midi=93 },
+                {
+                    .type=MOD_SRC_TYPE_LINEAR, .direction=MOD_SRC_DIR_MIN_TO_MAX,
+                    .polarity=MOD_SRC_POL_UNIPOLAR, .controller_type=MOD_CTRL_TYPE_MIDI, .midi=93
+                },
                 GEN_TYPE_CHORUS_EFFECTS_SEND,
                 { MOD_SRC_TYPE_LINEAR, MOD_SRC_DIR_MIN_TO_MAX, MOD_SRC_POL_UNIPOLAR, MOD_CTRL_TYPE_SRC, MOD_CTRL_SRC_NONE },
             },
@@ -1130,6 +1165,8 @@ namespace sf {
             case MOD_CTRL_SRC_PITCH_WHEEL: return "Pitch wheel";
             case MOD_CTRL_SRC_PITCH_WHEEL_SENSITIVITY: return "Pitch wheel sensitivity";
         }
+
+        return  "Unknown";
     };
 
     std::string toString(generator_type_t type)
@@ -1198,6 +1235,8 @@ namespace sf {
             case GEN_TYPE_UNUSED_5: return "Unused 5";
             case GEN_TYPE_UNUSED_END: return "Unused end";
         }
+
+        return  "Unknown";
     };
 
 
@@ -1699,7 +1738,7 @@ namespace sf {
         if (!loadInformation(stream, end_of_chunk))
             return false;
 
-        stream.seekg(end_of_chunk, std::ios::seekdir::beg);
+        stream.seekg(end_of_chunk, std::ios::beg);
 
         // Sample data chunk
         chunk_header_t sdta_header = readChunkHeader(stream);
@@ -1731,7 +1770,7 @@ namespace sf {
                 stream.read(reinterpret_cast<char*>(lsb_buffer), sm24_field.size);
             }
 
-            stream.seekg(smpl_data_start, std::ios::seekdir::beg);
+            stream.seekg(smpl_data_start, std::ios::beg);
 
             buffer_size = smpl_field.size >> 1;
             buffer = new float[buffer_size];
@@ -1775,7 +1814,7 @@ namespace sf {
             delete[] lsb_buffer;
         }
 
-        stream.seekg(end_of_chunk, std::ios::seekdir::beg);
+        stream.seekg(end_of_chunk, std::ios::beg);
 
         // Preset, Instrument, and Sample Header data chunk
         chunk_header_t ptda_header = readChunkHeader(stream);

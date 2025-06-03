@@ -10,6 +10,7 @@
 #include <knm_soundfont.hpp>
 
 #include <iostream>
+#include <cstring>
 
 using namespace knm::sf;
 
